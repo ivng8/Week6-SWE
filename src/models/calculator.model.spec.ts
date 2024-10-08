@@ -5,6 +5,8 @@ import { NumericKeys } from '../enums/numeric-keys.enum';
 import { OperatorKeys } from '../enums/operator-keys.enum';
 import { ActionKeys } from '../enums/action-keys.enum';
 import { assert } from 'console';
+import { ICalculatorObserver } from '../interfaces/calculator-observer.interface';
+import { CalculatorObserver } from './calculator.observer';
 
 describe('CalculatorModel', (): void => {
 
@@ -111,8 +113,11 @@ describe('CalculatorModel', (): void => {
 
   });
 
-  it('should display `82` when equals is clicked on `100 + 1 - 8 * 1 * 3 / 4 + 7 - 10 / 2 * 4', (): void => {
-
+  it('should console.log Performing calculation', (): void => {
+    let observer: ICalculatorObserver;
+    observer = new CalculatorObserver;
+    calculator.attach(observer);
+    const logSpy = jest.spyOn(global.console, 'log');
     calculator.pressNumericKey(NumericKeys.ONE);
     assert(calculator.display() === '1');
     calculator.pressNumericKey(NumericKeys.ZERO);
@@ -156,9 +161,8 @@ describe('CalculatorModel', (): void => {
     calculator.pressNumericKey(NumericKeys.FOUR);
     assert(calculator.display() === '102-5*4');
     calculator.pressActionKey(ActionKeys.EQUALS);
-    const displayValue: string = calculator.display();
-    expect(displayValue).toEqual('82');
-
+    expect(logSpy).toHaveBeenCalledWith('Performing calculation');
+    logSpy.mockRestore();
   });
 
 

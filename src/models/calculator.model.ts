@@ -4,6 +4,7 @@ import { NumericKeys } from '../enums/numeric-keys.enum';
 import { OperatorKeys } from '../enums/operator-keys.enum';
 import { IContext } from '../interfaces';
 import { ICalculatorModel } from '../interfaces/calculator-model.interface';
+import { ICalculatorObserver } from '../interfaces/calculator-observer.interface';
 import { ICalculatorState } from '../interfaces/calculator-state.interface';
 import { EnteringFirstNumberState } from '../states/entering-first-number-state';
 import { StateData } from './state-data.model';
@@ -11,6 +12,7 @@ import { StateData } from './state-data.model';
 export class CalculatorModel implements ICalculatorModel, IContext {
 
   private _state: ICalculatorState;
+  private observers: ICalculatorObserver[] = [];
 
   public constructor() {
     this._state = new EnteringFirstNumberState(this, new StateData.Builder().build());
@@ -38,6 +40,7 @@ export class CalculatorModel implements ICalculatorModel, IContext {
         break;
       case ActionKeys.EQUALS:
         this._state.equals();
+        this.notify("Performing calculation");
         break;
       default:
         throw new Error('Invalid Action');
@@ -48,4 +51,17 @@ export class CalculatorModel implements ICalculatorModel, IContext {
     return this._state.display();
   }
 
+  public attach(observer: ICalculatorObserver): void {
+    this.observers.push(observer);
+  }
+
+  public detach(): void {
+    this.observers.pop();
+  }
+
+  public notify(message: String): void {
+    for (let i = 0; i < this.observers.length; i += 1) {
+      this.observers[i].update(message);
+    }
+  }
 }
